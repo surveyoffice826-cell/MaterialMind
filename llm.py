@@ -10,8 +10,8 @@ load_dotenv()
 from crewai import LLM  # noqa: E402
 
 GROQ_URL = "https://api.groq.com/openai/v1"  # Groq's OpenAI-compatible endpoint
-PRIMARY_MODEL = "llama-3.3-70b-versatile"    # best quality
-FALLBACK_MODEL = "llama-3.1-8b-instant"      # fast, used if primary fails / rate-limited
+   PRIMARY_MODEL = "bara-model-ID"
+   FALLBACK_MODEL = "chhota-model-ID"
 MODELS = [PRIMARY_MODEL, FALLBACK_MODEL]
 
 
