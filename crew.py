@@ -6,24 +6,30 @@ from crewai import Crew, Process
 import material_normalizer
 import pdf_extractor
 import report_validator
-from llm import MODELS, get_api_key, make_llm
+from llm import get_api_key, get_models, make_llm
 from schemas import parse_rows
 
-# (model, seconds to wait first): primary, primary again after a pause, then fallback model
-ATTEMPTS = [(MODELS[0], 0), (MODELS[0], 30), (MODELS[1], 0)]
+GONE = ("model_not_found", "decommission", "does not exist", "no access")
 
 
 def _with_retry(job):
+    """Try the best model, retry once after a pause (rate limit), then fall back to other models."""
     if not get_api_key():
-        raise RuntimeError("GROQ_API_KEY is missing (add it to .env or Streamlit Secrets).")
-    last_error = None
-    for model, wait in ATTEMPTS:
+        raise RuntimeError("GROQ_API_KEY is missing (paste it in the sidebar, .env or Streamlit Secrets).")
+    models = get_models()
+    attempts = [(models[0], 0), (models[0], 30)] + [(m, 0) for m in models[1:3]]
+    bad, last_error = set(), None
+    for model, wait in attempts:
+        if model in bad:
+            continue
         if wait:
             time.sleep(wait)
         try:
             return job(make_llm(model)), model
         except Exception as exc:  # rate limit, bad JSON, model error -> try next option
             last_error = exc
+            if any(g in str(exc).lower() for g in GONE):
+                bad.add(model)  # do not retry a model that does not exist
     raise RuntimeError(f"Groq request failed after retries: {last_error}")
 
 
