@@ -1,0 +1,7 @@
+.env
+secrets.toml
+records.csv
+audit_log.csv
+__pycache__/
+*.pyc
+.venv/

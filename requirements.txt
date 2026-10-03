@@ -1,0 +1,7 @@
+crewai==1.15.18
+streamlit
+pdfplumber
+pandas
+openpyxl
+pydantic
+python-dotenv
